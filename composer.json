@@ -18,8 +18,8 @@
     "require": {
         "php": "^7.3",
         "elasticsearch/elasticsearch": "^7.0",
-        "illuminate/support": "^8.0",
-        "illuminate/contracts": "^8.0"
+        "illuminate/support": "^6.0|^7.0|^8.0",
+        "illuminate/contracts": "^6.0|^7.0|^8.0"
     },
     "require-dev": {
         "limedeck/phpunit-detailed-printer": "^6.0",

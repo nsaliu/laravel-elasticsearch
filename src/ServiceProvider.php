@@ -1,5 +1,12 @@
 <?php namespace Cviebrock\LaravelElasticsearch;
 
+use Cviebrock\LaravelElasticsearch\Console\Command\AliasCreateCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\AliasRemoveIndexCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\AliasSwitchIndexCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\IndexCreateCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\IndexCreateOrUpdateMappingCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\IndexDeleteCommand;
+use Cviebrock\LaravelElasticsearch\Console\Command\IndexExistsCommand;
 use Elasticsearch\Client;
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Application as LaravelApplication;
@@ -21,6 +28,7 @@ class ServiceProvider extends BaseServiceProvider
     public function boot()
     {
         $this->setUpConfig();
+        $this->setUpConsoleCommands();
     }
 
     /**
@@ -58,5 +66,20 @@ class ServiceProvider extends BaseServiceProvider
         }
 
         $this->mergeConfigFrom($source, 'elasticsearch');
+    }
+
+    private function setUpConsoleCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                AliasCreateCommand::class,
+                AliasRemoveIndexCommand::class,
+                AliasSwitchIndexCommand::class,
+                IndexCreateCommand::class,
+                IndexCreateOrUpdateMappingCommand::class,
+                IndexDeleteCommand::class,
+                IndexExistsCommand::class,
+            ]);
+        }
     }
 }

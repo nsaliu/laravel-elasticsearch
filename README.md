@@ -2,11 +2,17 @@
 
 An easy way to use the [official Elastic Search client](https://github.com/elastic/elasticsearch-php) in your Laravel or Lumen applications.
 
-[![Build Status](https://travis-ci.org/cviebrock/laravel-elasticsearch.svg)](https://travis-ci.org/cviebrock/laravel-elasticsearch)
+> ## ⚠️ This Package Will Be Abandoned
+> Due to several factors, including the fact that I no longer use ES,
+> I will be ceasing development on this package.  If you are interested in
+> taking over this project, please reach out to me here or on Twitter: @cviebrock
+
+[![Build Status](https://github.com/cviebrock/laravel-elasticsearch/workflows/tests/badge.svg?branch=master)](https://github.com/cviebrock/laravel-elasticsearch/actions)
 [![Total Downloads](https://poser.pugx.org/cviebrock/laravel-elasticsearch/downloads.png)](https://packagist.org/packages/cviebrock/laravel-elasticsearch)
 [![Latest Stable Version](https://poser.pugx.org/cviebrock/laravel-elasticsearch/v/stable.png)](https://packagist.org/packages/cviebrock/laravel-elasticsearch)
 [![Latest Stable Version](https://poser.pugx.org/cviebrock/laravel-elasticsearch/v/unstable.png)](https://packagist.org/packages/cviebrock/laravel-elasticsearch)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cviebrock/laravel-elasticsearch/badges/quality-score.png?format=flat)](https://scrutinizer-ci.com/g/cviebrock/laravel-elasticsearch)
+[![License](https://img.shields.io/packagist/l/cviebrock/laravel-elasticsearch)](LICENSE.md)
+
 
 - [Installation and Configuration](#installation-and-configuration)
   - [Laravel](#laravel)
@@ -15,6 +21,7 @@ An easy way to use the [official Elastic Search client](https://github.com/elast
   - [Lumen](#lumen)
 - [Usage](#usage)
 - [Advanced Usage](#advanced-usage)
+- [Console Commands](#console-commands)
 - [Bugs, Suggestions, Contributions and Support](#bugs-suggestions-contributions-and-support)
 - [Copyright and License](#copyright-and-license)
 
@@ -86,6 +93,8 @@ $credentials = $memoizedProvider()->wait();
 'hosts' => [
     [
         'host'            => env('ELASTICSEARCH_HOST', 'localhost'),
+        // For local development, the default Elasticsearch port is 9200.
+        // If you are connecting to an Elasticsearch instance on AWS, you probably want to set this to null
         'port'            => env('ELASTICSEARCH_PORT', 9200),
         'scheme'          => env('ELASTICSEARCH_SCHEME', null),
         'user'            => env('ELASTICSEARCH_USER', null),
@@ -117,6 +126,22 @@ $memoizedProvider = \Aws\Credentials\CredentialProvider::memoize($provider);
     [
         ...
         'aws_credentials' => $memoizedProvider
+    ],
+],
+```
+
+If you are using `php artisan config:cache`, you cannot have the Closure in your config file, call it like this:
+
+```php
+<?php
+// config/elasticsearch.php
+
+...
+
+'hosts' => [
+    [
+        ...
+        'aws_credentials' => [\Aws\Credentials\CredentialProvider::class, 'defaultProvider'],
     ],
 ],
 ```
@@ -236,6 +261,76 @@ and the methods and parameters used to call them can be found in the
 [Elastic documentation](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html).
 Help with using them is available via the [Elastic forums](https://discuss.elastic.co/) 
 and on sites like [Stack Overflow](https://stackoverflow.com/questions/tagged/elasticsearch).
+
+
+
+## Console commands
+
+This package also provides some useful console commands.
+
+Check if an index exists:
+
+```sh
+php artisan laravel-elasticsearch:utils:index-exists <your_elasticsearch_index_name>
+```
+
+Create an index:
+
+```sh
+php artisan laravel-elasticsearch:utils:index-create <your_elasticsearch_index_name>
+```
+
+Delete an index:
+
+```sh
+php artisan laravel-elasticsearch:utils:index-delete <your_elasticsearch_index_name>
+```
+
+Create or update index mapping:  
+_Note: The index mapping file must contain a valid JSON mapping definition as Elasticsearch expects, for example:_
+
+```json
+{
+    "body": {
+        "_source": {
+            "enabled": true
+        },
+        "properties": {
+            "id": {
+                "type": "keyword"
+            },
+            "property_1": {
+                "type": "text"
+            },
+            "property_2": {
+                "type": "text"
+            }
+        }
+    }
+}
+```
+
+```sh
+php artisan laravel-elasticsearch:utils:index-create-or-update-mapping <your_elasticsearch_index_name> <json_mapping_absolute_file_path>
+```
+
+Creates an alias:
+
+```sh
+php artisan laravel-elasticsearch:utils:alias-create <your_elasticsearch_index_name> <your_elasticsearch_alias_name>
+```
+
+Remove index from an alias:
+
+```sh
+php artisan laravel-elasticsearch:utils:alias-remove-index <your_elasticsearch_index_name> <your_elasticsearch_alias_name>
+```
+
+Switch index on alias (useful for zero-downtime release of the new index):
+
+```sh
+php artisan laravel-elasticsearch:utils:alias-switch-index <your_NEW_elasticsearch_index_name> <your_OLD_elasticsearch_index_name> <your_elasticsearch_alias_name>
+```  
 
 
 
